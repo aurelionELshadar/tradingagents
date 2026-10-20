@@ -122,6 +122,28 @@ When searching, consider these common categories:
 2. **Try alternative terms**: If "deploy" doesn't work, try "deployment" or "ci-cd"
 3. **Check popular sources**: Many skills come from `vercel-labs/agent-skills` or `ComposioHQ/awesome-claude-skills`
 
+## Fallback: When skills.sh Is Unreachable
+
+In sandboxed environments (e.g. Claude Code cloud sessions with a limited network policy), `skills.sh` may be blocked. Symptoms: `npx skills find` returns "No skills found" for every query, even common ones like `react`. GitHub is usually still reachable, so search known skill repositories directly instead:
+
+```bash
+npx skills add https://github.com/<owner>/<repo> --list
+```
+
+This lists every skill in the repository with its description. Pick matching skills from that output, then install with:
+
+```bash
+npx skills add https://github.com/<owner>/<repo> --skill <name> -g -y
+```
+
+Repositories worth listing first:
+
+- `anthropics/skills` — documents, artifacts, design, testing
+- `vercel-labs/agent-skills` — React, Next.js, web design
+- `ComposioHQ/awesome-claude-skills` — broad community collection
+
+Apply the same quality checks from Step 4 (source reputation, stars) before recommending.
+
 ## When No Skills Are Found
 
 If no relevant skills exist:

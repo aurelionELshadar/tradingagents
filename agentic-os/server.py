@@ -1,6 +1,9 @@
 """Agentic OS - kleiner lokaler Server. Nur Python-Standardbibliothek.
 Lauscht ausschliesslich auf 127.0.0.1 (nicht aus dem Netz erreichbar)."""
-import json, os, time
+import contextlib
+import json
+import os
+import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse
 
@@ -95,7 +98,5 @@ class H(BaseHTTPRequestHandler):
 if __name__ == "__main__":
     srv = ThreadingHTTPServer((HOST, PORT), H)
     print(f"Agentic OS läuft auf http://{HOST}:{PORT}  (Strg+C zum Beenden)", flush=True)
-    try:
+    with contextlib.suppress(KeyboardInterrupt):
         srv.serve_forever()
-    except KeyboardInterrupt:
-        pass

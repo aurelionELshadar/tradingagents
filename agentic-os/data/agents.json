@@ -1,0 +1,26 @@
+[
+  {
+    "id": "recherche",
+    "name": "Recherche",
+    "aufgabe": "Sammelt Quellen und fasst sie zusammen",
+    "status": "läuft"
+  },
+  {
+    "id": "inbox",
+    "name": "Posteingang",
+    "aufgabe": "Sortiert Mails nach Dringlichkeit",
+    "status": "läuft"
+  },
+  {
+    "id": "shop",
+    "name": "Shop-Pflege",
+    "aufgabe": "Prüft Listings und Preise",
+    "status": "pausiert"
+  },
+  {
+    "id": "briefing",
+    "name": "Tagesbriefing",
+    "aufgabe": "Baut jeden Morgen die Übersicht",
+    "status": "pausiert"
+  }
+]

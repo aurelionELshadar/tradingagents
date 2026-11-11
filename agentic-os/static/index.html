@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agentic OS</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Jost:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#1a1511;--panel:#241d17;--line:#3a2f25;--text:#eadfce;--mute:#a09280;--gold:#c8974a;--ok:#8fb573}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Jost,system-ui,sans-serif;display:flex;min-height:100vh}
+nav{width:200px;background:var(--panel);border-right:1px solid var(--line);padding:24px 12px;flex-shrink:0}
+nav h1{font-family:'Cormorant Garamond',Georgia,serif;color:var(--gold);font-size:26px;margin:0 8px 24px}
+nav button{display:block;width:100%;text-align:left;background:none;border:0;color:var(--mute);font:500 16px Jost,sans-serif;padding:12px;border-radius:8px;cursor:pointer}
+nav button:hover{color:var(--text)}
+nav button.on{background:var(--bg);color:var(--gold)}
+main{flex:1;padding:28px;max-width:960px}
+h2{font-family:'Cormorant Garamond',Georgia,serif;font-size:30px;font-weight:600;margin:0 0 20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-bottom:24px}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+.tile .n{font-family:'Cormorant Garamond',Georgia,serif;font-size:40px;color:var(--gold)}
+.tile small,.mute{color:var(--mute)}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--mute);margin-right:8px}
+.dot.l{background:var(--ok)}
+button.a{background:none;border:1px solid var(--gold);color:var(--gold);border-radius:8px;padding:6px 12px;font:500 14px Jost,sans-serif;cursor:pointer;margin-top:10px}
+ul{list-style:none;padding:0;margin:0}
+li{padding:10px 0;border-bottom:1px solid var(--line)}
+pre{white-space:pre-wrap;font:inherit;margin:6px 0 0;color:var(--mute)}
+@media(max-width:600px){body{flex-direction:column}nav{width:100%;display:flex;overflow-x:auto;padding:8px;border:0;border-bottom:1px solid var(--line)}nav h1{display:none}nav button{width:auto;white-space:nowrap}main{padding:16px}}
+</style></head><body>
+<nav><h1>Agentic OS</h1>
+<button data-v="cockpit" class="on">Cockpit</button>
+<button data-v="agenten">Agenten</button>
+<button data-v="gehirn">Gehirn</button>
+<button data-v="nacht">Nacht</button></nav>
+<main id="main"></main>
+<script>
+let S={agenten:[],ereignisse:[],gehirn:[],nacht:[]},view="cockpit";
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+async function load(){S=await (await fetch("/api/state")).json();draw()}
+async function toggle(id){await fetch(`/api/agenten/${encodeURIComponent(id)}/umschalten`,{method:"POST"});load()}
+function agentCard(a,btn){return `<div class="tile"><span class="dot ${a.status==="läuft"?"l":""}"></span><b>${esc(a.name)}</b><br><small>${esc(a.aufgabe)}</small><br><small>${esc(a.status)}</small>${btn?`<br><button class="a" onclick="toggle('${esc(a.id)}')">${a.status==="läuft"?"Pausieren":"Starten"}</button>`:""}</div>`}
+function draw(){
+ const run=S.agenten.filter(a=>a.status==="läuft");
+ let h="";
+ if(view==="cockpit"){
+  h=`<h2>Cockpit</h2><div class="grid">
+  <div class="tile"><div class="n">${run.length}/${S.agenten.length}</div><small>Agenten laufen</small></div>
+  <div class="tile"><div class="n">${S.gehirn.length}</div><small>Notizen im Gehirn</small></div>
+  <div class="tile"><div class="n">${S.nacht.length}</div><small>Nacht-Jobs</small></div></div>
+  <h2>Läuft gerade</h2><div class="grid">${run.map(a=>agentCard(a,false)).join("")||'<p class="mute">Nichts läuft.</p>'}</div>
+  <h2>Zuletzt passiert</h2><ul>${S.ereignisse.map(e=>`<li>${esc(e.text)}<br><small class="mute">${esc(e.zeit)}</small></li>`).join("")}</ul>`;
+ }else if(view==="agenten"){
+  h=`<h2>Agenten</h2><div class="grid">${S.agenten.map(a=>agentCard(a,true)).join("")}</div><p class="mute">Starten/Pausieren ändert hier nur den Status. Echte Agenten hängst du später an.</p>`;
+ }else if(view==="gehirn"){
+  h=`<h2>Gehirn</h2><p class="mute">Jede .md-Datei im Ordner brain/ erscheint hier.</p><ul>${S.gehirn.map(n=>`<li><b>${esc(n.name)}</b><pre>${esc(n.text)}</pre></li>`).join("")}</ul>`;
+ }else{
+  h=`<h2>Nacht</h2><ul>${S.nacht.map(j=>`<li><b>${esc(j.zeit)}</b> · ${esc(j.job)}<br><small class="mute">Letzter Lauf: ${esc(j.letzter_lauf)} · ${esc(j.ergebnis)}</small></li>`).join("")}</ul>`;
+ }
+ document.getElementById("main").innerHTML=h;
+}
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{view=b.dataset.v;document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x===b));draw()});
+load();setInterval(load,5000);
+</script></body></html>
